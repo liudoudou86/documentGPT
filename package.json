@@ -4,7 +4,7 @@
     "description": "这是一个文档类型的GPT辅助工具",
     "version": "0.0.1",
     "publisher": "Tesla Liu",
-    "icon": "./images/icon.png",
+    "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.78.0"
     },
@@ -42,17 +42,20 @@
     "scripts": {
         "lint": "eslint .",
         "pretest": "npm run lint",
-        "test": "node ./test/runTest.js"
+        "test": "node ./src/test/runTest.js"
     },
     "devDependencies": {
-        "@types/vscode": "^1.78.0",
         "@types/glob": "^8.0.1",
         "@types/mocha": "^10.0.1",
         "@types/node": "16.x",
+        "@types/vscode": "^1.78.0",
+        "@vscode/test-electron": "^2.2.2",
         "eslint": "^8.33.0",
         "glob": "^8.1.0",
         "mocha": "^10.1.0",
-        "typescript": "^4.9.4",
-        "@vscode/test-electron": "^2.2.2"
+        "typescript": "^4.9.4"
+    },
+    "dependencies": {
+        "axios": "^1.4.0"
     }
 }
