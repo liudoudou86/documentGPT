@@ -1,0 +1,58 @@
+{
+    "name": "document-gpt",
+    "displayName": "documentGPT",
+    "description": "这是一个文档类型的GPT辅助工具",
+    "version": "0.0.1",
+    "publisher": "Tesla Liu",
+    "icon": "./images/icon.png",
+    "engines": {
+        "vscode": "^1.78.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:document-gpt.input"
+    ],
+    "main": "./src/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "documentGPT.input",
+                "title": "Start documentGPT"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "documentGPT.input",
+                "key": "ctrl+z",
+                "when": "editorTextFocus"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "when": "editorFocus",
+                    "command": "documentGPT.input",
+                    "group": "navigation"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "pretest": "npm run lint",
+        "test": "node ./test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.78.0",
+        "@types/glob": "^8.0.1",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "16.x",
+        "eslint": "^8.33.0",
+        "glob": "^8.1.0",
+        "mocha": "^10.1.0",
+        "typescript": "^4.9.4",
+        "@vscode/test-electron": "^2.2.2"
+    }
+}
