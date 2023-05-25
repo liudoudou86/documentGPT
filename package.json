@@ -18,7 +18,7 @@
     "contributes": {
         "configuration": {
 			"type": "object",
-			"title": "documentGPT",
+			"title": "DocumentGPT",
 			"properties": {
                 "documentGPT.url": {
 					"type": "string",
