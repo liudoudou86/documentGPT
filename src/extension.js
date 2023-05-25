@@ -49,10 +49,11 @@ function inputUserQuestion(filePath, message) {
 			vscode.window.showTextDocument(doc).then(editor => {
 					// 获取 vscode.TextEditorEdit对象， 然后进行字符处理
 					editor.edit(editorEdit => {
-							// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
+							// 读取末尾行
 							const number = doc.lineAt(doc.lineCount - 1);
 							const lastLine = number['a'];
 							// console.log('最后一行: ' + lastLine);
+							// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
 							editorEdit.insert(new vscode.Position(lastLine, 0), "👦: " + message + "\r\n");
 					}).then(isSuccess => {
 							if (isSuccess) {
@@ -77,10 +78,11 @@ function inputSystemAnswer(filePath, message) {
 			vscode.window.showTextDocument(doc).then(editor => {
 					// 获取 vscode.TextEditorEdit对象， 然后进行字符处理
 					editor.edit(editorEdit => {
-							// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
+							// 读取末尾行
 							const number = doc.lineAt(doc.lineCount - 1);
 							const lastLine = number['a'];
 							// console.log('最后一行: ' + lastLine);
+							// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
 							editorEdit.insert(new vscode.Position(lastLine, 0), "🤖: " + message + "\r\n");
 					}).then(isSuccess => {
 							if (isSuccess) {
@@ -97,7 +99,7 @@ function inputSystemAnswer(filePath, message) {
 	});
 }
 
-function chatGptRequest(text) {
+function chatGptRequest(question) {
 	axios({
 		method: 'post',
 		url: url,
@@ -112,10 +114,9 @@ function chatGptRequest(text) {
 				},
 				{
 					"role": "user",
-					"content": text
+					"content": question
 				}
 			],
-			// "tokensLength": 55,
 			"model": "gpt-3.5-turbo"
 		},
 	})

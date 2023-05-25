@@ -1,7 +1,7 @@
 {
     "name": "document-gpt",
-    "displayName": "documentGPT",
-    "description": "这是一个文档类型的GPT辅助工具",
+    "displayName": "DocumentGPT",
+    "description": "文档类型的GPT辅助工具",
     "version": "0.0.1",
     "publisher": "Tesla Liu",
     "icon": "images/icon.png",
@@ -41,7 +41,7 @@
         "keybindings": [
             {
                 "command": "documentGPT.input",
-                "key": "ctrl+z",
+                "key": "ctrl+shift+z",
                 "when": "editorTextFocus"
             }
         ],
