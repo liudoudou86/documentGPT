@@ -16,6 +16,22 @@
     ],
     "main": "./src/extension.js",
     "contributes": {
+        "configuration": {
+			"type": "object",
+			"title": "documentGPT",
+			"properties": {
+                "documentGPT.url": {
+					"type": "string",
+                    "default": "https://api.aigcfun.com/api/v1/text",
+					"description": "documentGPT's url"
+				},
+				"documentGPT.key": {
+					"type": "string",
+                    "default": null,
+					"description": "documentGPT's key"
+				}
+			}
+		},
         "commands": [
             {
                 "command": "documentGPT.input",

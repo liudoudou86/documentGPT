@@ -2,7 +2,10 @@ const vscode = require('vscode');
 const axios = require('axios').default;
 // 获取当前已激活的编辑器
 const { document, selection } = vscode.window.activeTextEditor;
-const key = 'FCYLFSDJ47RHP9JG2N';
+// 读取vscode的配置项：documentGPT.key
+const documentGPTConfig = vscode.workspace.getConfiguration('documentGPT');
+const key = documentGPTConfig.get('key');
+const url = documentGPTConfig.get('url');
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -15,6 +18,7 @@ function activate(context) {
 	console.log('documentGPT已被激活!');
 	// 通过vscode指令进行激活
 	let disposable = vscode.commands.registerCommand('documentGPT.input', function () {
+		vscode.window.showInformationMessage('documentGPT已被激活!');
 		// 弹出输入窗口
 		vscode.window.showInputBox({
 					password: false,
@@ -33,7 +37,8 @@ function activate(context) {
 
 // This method is called when your extension is deactivated
 function deactivate() {
-	console.log('document已被停用!');
+	console.log('documentGPT已被停用!');
+	vscode.window.showInformationMessage('documentGPT已被停用!');
 }
 
 // 修改在VSCode编辑器中打开的文档内容并且继续展示
@@ -45,7 +50,10 @@ function inputUserQuestion(filePath, message) {
 					// 获取 vscode.TextEditorEdit对象， 然后进行字符处理
 					editor.edit(editorEdit => {
 							// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
-							editorEdit.insert(new vscode.Position(0, 0), "👦 Question: " + message + "\r\n");
+							const number = doc.lineAt(doc.lineCount - 1);
+							const lastLine = number['a'];
+							// console.log('最后一行: ' + lastLine);
+							editorEdit.insert(new vscode.Position(lastLine, 0), "👦: " + message + "\r\n");
 					}).then(isSuccess => {
 							if (isSuccess) {
 									console.log("插入成功");
@@ -70,7 +78,10 @@ function inputSystemAnswer(filePath, message) {
 					// 获取 vscode.TextEditorEdit对象， 然后进行字符处理
 					editor.edit(editorEdit => {
 							// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
-							editorEdit.insert(new vscode.Position(1, 0), "🤖 Answer: " + message + "\r\n");
+							const number = doc.lineAt(doc.lineCount - 1);
+							const lastLine = number['a'];
+							// console.log('最后一行: ' + lastLine);
+							editorEdit.insert(new vscode.Position(lastLine, 0), "🤖: " + message + "\r\n");
 					}).then(isSuccess => {
 							if (isSuccess) {
 									console.log("插入成功");
@@ -89,7 +100,7 @@ function inputSystemAnswer(filePath, message) {
 function chatGptRequest(text) {
 	axios({
 		method: 'post',
-		url: 'https://api.aigcfun.com/api/v1/text',
+		url: url,
 		params: {
 			key: key
 		},
@@ -104,7 +115,7 @@ function chatGptRequest(text) {
 					"content": text
 				}
 			],
-			"tokensLength": 55,
+			// "tokensLength": 55,
 			"model": "gpt-3.5-turbo"
 		},
 	})
