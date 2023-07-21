@@ -1,7 +1,7 @@
 {
     "name": "document-gpt",
     "displayName": "DocumentGPT",
-    "description": "文档类型的GPT辅助工具",
+    "description": "文档型GPT对话工具",
     "version": "0.0.1",
     "publisher": "Tesla Liu",
     "icon": "images/icon.png",
@@ -17,25 +17,29 @@
     "main": "./src/extension.js",
     "contributes": {
         "configuration": {
-			"type": "object",
-			"title": "DocumentGPT",
-			"properties": {
+            "type": "object",
+            "title": "DocumentGPT",
+            "properties": {
                 "documentGPT.url": {
-					"type": "string",
+                    "type": "string",
                     "default": "https://api.aigcfun.com/api/v1/text",
-					"description": "documentGPT's url"
-				},
-				"documentGPT.key": {
-					"type": "string",
+                    "description": "DocumentGPT's Url"
+                },
+                "documentGPT.key": {
+                    "type": "string",
                     "default": null,
-					"description": "documentGPT's key"
-				}
-			}
-		},
+                    "description": "DocumentGPT's Key"
+                }
+            }
+        },
         "commands": [
             {
                 "command": "documentGPT.input",
-                "title": "Start documentGPT"
+                "title": "DocumentGPT Start"
+            },
+            {
+                "command": "documentGPT.clear",
+                "title": "DocumentGPT Clear"
             }
         ],
         "keybindings": [
@@ -50,6 +54,11 @@
                 {
                     "when": "editorFocus",
                     "command": "documentGPT.input",
+                    "group": "navigation"
+                },
+                {
+                    "when": "editorFocus",
+                    "command": "documentGPT.clear",
                     "group": "navigation"
                 }
             ]
@@ -68,6 +77,7 @@
         "@vscode/test-electron": "^2.2.2",
         "eslint": "^8.33.0",
         "glob": "^8.1.0",
+        "jest": "^29.6.1",
         "mocha": "^10.1.0",
         "typescript": "^4.9.4"
     },
