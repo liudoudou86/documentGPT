@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const axios = require('axios').default;
 // 获取当前已激活的编辑器
-const { document, selection } = vscode.window.activeTextEditor;
+const activeEditor = vscode.window.activeTextEditor;
 // 读取vscode的配置项: documentGPT.key
 const documentGPTConfig = vscode.workspace.getConfiguration('documentGPT');
 const key = documentGPTConfig.get('key');
@@ -24,13 +24,34 @@ function activate(context) {
 
 	console.log('documentGPT已被激活!');
 	// 通过vscode指令进行激活
-	let initConversation = vscode.commands.registerCommand('documentGPT.input', function () {
-		const selectedText = document.getText(selection);
-		console.log('selectedText: ' + selectedText);
-		if (selectedText != null) {
-			// 通过识别是否有所选内容进行判断
-			let question = "👦: " + selectedText;
-				textInput(document.uri, question);
+	let initConversation = vscode.commands.registerCommand('documentGPT.input', async function () {
+		if (activeEditor) {
+			const { document, selection } = activeEditor;
+			const selectedText = document.getText(selection);
+			activeEditor.revealRange(selection);
+			console.log('selectedText: ' + selectedText);
+			if (!selectedText) {
+					// 弹出输入窗口
+					const userMessage = await vscode.window.showInputBox({
+						password: false,
+						ignoreFocusOut: true,
+						placeHolder: '你想问什么?',
+					})
+					if (userMessage === undefined) {
+						console.log('用户取消操作');
+					} else {
+						let question = "👦: " + userMessage;
+						textInput(document.uri, question);
+						let user = {
+							role: 'user',
+							content: userMessage
+						};
+						jsonObj.push(user);
+						console.log('user: ' + JSON.stringify(jsonObj));
+						chatGptRequest(jsonObj);
+					};
+			} else {
+				// 通过识别是否有所选内容进行判断
 				let user = {
 					role: 'user',
 					content: selectedText
@@ -38,24 +59,9 @@ function activate(context) {
 				jsonObj.push(user);
 				console.log('user: ' + JSON.stringify(jsonObj));
 				chatGptRequest(jsonObj);
+			}
 		} else {
-			// 弹出输入窗口
-				vscode.window.showInputBox({
-					password: false,
-					ignoreFocusOut: true,
-					placeHolder: '你想问什么?',
-					// validateInput: function(text){return text;}
-			}).then(function(userMessage){
-				let question = "👦: " + userMessage;
-				textInput(document.uri, question);
-				let user = {
-					role: 'user',
-					content: userMessage
-				};
-				jsonObj.push(user);
-				console.log('user: ' + JSON.stringify(jsonObj));
-				chatGptRequest(jsonObj);
-			});
+			console.log('没有识别到选中的内容');
 		}
 	});
 
@@ -107,6 +113,7 @@ function textInput(filePath, message) {
 	});
 }
 
+
 /**
  * 
  * @param {*} messages 向GPT请求的文本内容
@@ -126,7 +133,7 @@ function chatGptRequest(messages) {
 	.then(function (res) {
 		let robotMessage = res.data.choices[0].text;
 		let answer = "🤖: " + robotMessage;
-		textInput(document.uri, answer);
+		textInput(activeEditor.document.uri, answer);
 		let assistant = {
 			role: 'assistant',
 			content: robotMessage
