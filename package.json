@@ -45,23 +45,33 @@
         "keybindings": [
             {
                 "command": "documentGPT.input",
-                "key": "ctrl+shift+z",
+                "key": "shift+z",
                 "when": "editorTextFocus"
             }
         ],
+        "submenus": [
+            {
+              "id": "myProject/content",
+              "label": "DocumentGPT"
+            }
+          ],
         "menus": {
             "editor/context": [
                 {
-                    "when": "editorFocus",
-                    "command": "documentGPT.input",
-                    "group": "navigation"
-                },
-                {
-                    "when": "editorFocus",
-                    "command": "documentGPT.clear",
+                    "submenu": "myProject/content",
                     "group": "navigation"
                 }
-            ]
+            ],
+            "myProject/content": [
+                {
+                  "command": "documentGPT.input",
+                  "group": "1"
+                },
+                {
+                  "command": "documentGPT.clear",
+                  "group": "2"
+                }
+              ]
         }
     },
     "scripts": {
