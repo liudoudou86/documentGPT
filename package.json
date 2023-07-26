@@ -45,7 +45,7 @@
         "keybindings": [
             {
                 "command": "documentGPT.input",
-                "key": "shift+z",
+                "key": "alt+shift+z",
                 "when": "editorTextFocus"
             }
         ],
