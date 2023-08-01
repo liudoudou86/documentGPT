@@ -29,6 +29,11 @@
                     "type": "string",
                     "default": null,
                     "description": "DocumentGPT's Key"
+                },
+                "documentGPT.prompt": {
+                    "type": "string",
+                    "default": null,
+                    "description": "DocumentGPT's Prompt"
                 }
             }
         },
@@ -40,6 +45,10 @@
             {
                 "command": "documentGPT.clear",
                 "title": "DocumentGPT Clear"
+            },
+            {
+                "command": "documentGPT.custom",
+                "title": "DocumentGPT Custom"
             }
         ],
         "keybindings": [
@@ -69,6 +78,10 @@
                 },
                 {
                   "command": "documentGPT.clear",
+                  "group": "1"
+                },
+                {
+                  "command": "documentGPT.custom",
                   "group": "2"
                 }
               ]

@@ -4,14 +4,26 @@ const axios = require("axios").default;
 const activeEditor = vscode.window.activeTextEditor;
 // 读取vscode的配置项: documentGPT.key
 const documentGPTConfig = vscode.workspace.getConfiguration("documentGPT");
-const key = documentGPTConfig.get("key");
 const url = documentGPTConfig.get("url");
+const key = documentGPTConfig.get("key");
+const prompt = documentGPTConfig.get("prompt");
 
 let jsonObj = [
 	{
-		"role":"system",
-		"content":"请以markdown的形式返回答案"
+		"role": "system",
+		"content": "请以markdown的形式返回答案"
 	}
+];
+
+let customObj = [
+	{
+		"role": "system",
+		"content": "请以markdown的形式返回答案"
+	},
+	{
+		"role": "user",
+		"content": prompt
+	},
 ];
 
 // This method is called when your extension is activated
@@ -24,11 +36,10 @@ function activate(context) {
 
 	console.log("documentGPT已被激活!");
 	// 通过vscode指令进行激活
-	let initConversation = vscode.commands.registerCommand("documentGPT.input", async function () {
+	const initConversation = vscode.commands.registerCommand("documentGPT.input", async function () {
 		if (activeEditor) {
 			const { document, selection } = activeEditor;
 			const selectedText = document.getText(selection);
-			activeEditor.revealRange(selection);
 			console.log("selectedText: " + selectedText);
 			if (!selectedText) {
 				// 弹出输入窗口
@@ -40,38 +51,58 @@ function activate(context) {
 				if (userMessage === undefined) {
 					console.log("用户取消操作");
 				} else {
-					let question = "👦: " + userMessage;
+					const question = "👦: " + userMessage;
 					textInput(document.uri, question);
-					let user = {
-						role: "user",
-						content: userMessage
-					};
-					jsonObj.push(user);
-					console.log("user: " + JSON.stringify(jsonObj));
-					chatGptRequest(jsonObj);
+					processUserMessage(userMessage, "0");
+					chatGptRequest(jsonObj, "0");
 				}
 			} else {
-				// 通过识别是否有所选内容进行判断
-				let user = {
-					role: "user",
-					content: selectedText
-				};
-				jsonObj.push(user);
-				console.log("user: " + JSON.stringify(jsonObj));
-				chatGptRequest(jsonObj);
+				processUserMessage(selectedText, "0");
+				chatGptRequest(jsonObj, "0");
 			}
 		} else {
 			console.log("没有识别到选中的内容");
 		}
 	});
 
-	let clearConversation = vscode.commands.registerCommand("documentGPT.clear", function () {
+	const customConversation = vscode.commands.registerCommand("documentGPT.custom", async function () {
+		if (activeEditor) {
+			const { document, selection } = activeEditor;
+			const selectedText = document.getText(selection);
+			console.log("selectedText: " + selectedText);
+			if (!selectedText) {
+				// 弹出输入窗口
+				const userMessage = await vscode.window.showInputBox({
+					password: false,
+					ignoreFocusOut: true,
+					placeHolder: "你想问什么?",
+				});
+				if (userMessage === undefined) {
+					console.log("用户取消操作");
+				} else {
+					const question = "👦: " + userMessage;
+					textInput(document.uri, question);
+					processUserMessage(userMessage, "1");
+					chatGptRequest(customObj, "1");
+				}
+			} else {
+				processUserMessage(selectedText, "1");
+				chatGptRequest(customObj, "1");
+			}
+		} else {
+			console.log("没有识别到选中的内容");
+		}
+	});
+
+	const clearConversation = vscode.commands.registerCommand("documentGPT.clear", function () {
 		jsonObj.splice(1); // 删除对象索引1之后的数据
+		customObj.splice(2);
 		console.log("clear: " + JSON.stringify(jsonObj));
+		console.log("clear: " + JSON.stringify(customObj));
 		vscode.window.showInformationMessage("documentGPT会话已清除!");
 	});
 
-	context.subscriptions.push(initConversation, clearConversation);
+	context.subscriptions.push(initConversation, clearConversation, customConversation);
 }
 
 // This method is called when your extension is deactivated
@@ -81,70 +112,87 @@ function deactivate() {
 }
 
 /**
- * 
+ * 文本输入
  * @param {*} filePath 识别起始行
  * @param {*} message 准备插入的文本内容
  */
-function textInput(filePath, message) {
-	// 获取 vscode.TextDocument对象
-	vscode.workspace.openTextDocument(filePath).then(doc => {
+async function textInput(filePath, message) {
+	try {
+		// 获取 vscode.TextDocument对象
+		const doc = await vscode.workspace.openTextDocument(filePath);
 		// 获取 vscode.TextEditor对象
-		vscode.window.showTextDocument(doc).then(editor => {
-			// 获取 vscode.TextEditorEdit对象， 然后进行字符处理
-			editor.edit(editorEdit => {
-				// 读取末尾行
-				const number = doc.lineAt(doc.lineCount - 1);
-				const lastLine = number["a"];
-				// console.log('最后一行: ' + lastLine);
-				// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
-				editorEdit.insert(new vscode.Position(lastLine, 0), message + "  \r\n");
-			}).then(isSuccess => {
-				if (isSuccess) {
-					console.log("文本插入成功");
-				} else {
-					console.log("文本插入失败");
-				}
-			}, err => {
-				console.error("文本插入错误: " + err);
-			});
+		const editor = await vscode.window.showTextDocument(doc);
+		// 获取 vscode.TextEditorEdit对象， 然后进行字符处理
+		await editor.edit(editorEdit => { 
+			const lastLine = doc.lineAt(doc.lineCount - 1);
+			console.log("最后一行: " + JSON.stringify(lastLine));
+			// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
+			editorEdit.insert(lastLine.range.end, `\n${message}`);
 		});
-	}).then(undefined, err => {
-		console.error(err);
-	});
+		console.log("文本插入成功");
+	} catch (err) {
+		console.error("文本插入错误: " + err);
+	}
 }
 
 
 /**
- * 
- * @param {*} messages 向GPT请求的文本内容
+ * GTP请求
+ * @param {*} messages 
+ * @param {*} isPublicMessage 0为公共prompt
  */
-function chatGptRequest(messages) {
-	axios({
-		method: "post",
-		url: url,
-		params: {
-			key: key
-		},
-		data: {
-			"messages": messages,
-			"model": "gpt-3.5-turbo"
-		},
-	})
-		.then(function (res) {
-			let robotMessage = res.data.choices[0].text;
-			let answer = "🤖: " + robotMessage;
-			textInput(activeEditor.document.uri, answer);
-			let assistant = {
-				role: "assistant",
-				content: robotMessage
-			};
+async function chatGptRequest(messages, isPublicMessage) {
+	try {
+		const res = await axios.post(url, {
+			messages: messages,
+			model: "gpt-3.5-turbo"
+		}, {
+			params: {
+				key: key
+			}
+		});
+
+		const robotMessage = res.data.choices[0].text;
+		const answer = "🤖: " + robotMessage;
+		textInput(activeEditor.document.uri, answer);
+
+		const assistant = {
+			role: "assistant",
+			content: robotMessage
+		};
+
+		if (isPublicMessage === "0") {
 			jsonObj.push(assistant);
 			console.log("assistant: " + JSON.stringify(jsonObj));
-		})
-		.catch(function (err) {
-			console.log("系统异常: " + err);
-		});
+		} else {
+			customObj.push(assistant);
+			console.log("assistant: " + JSON.stringify(customObj));
+		}
+	} catch (err) {
+		console.error("系统异常: " + err);
+	}
 }
+
+
+/**
+ * 报文拼装
+ * @param {*} userMessage 
+ * @param {*} isPublicMessage 0为公共prompt
+ */
+function processUserMessage(userMessage, isPublicMessage) {
+	const user = {
+		role: "user",
+		content: userMessage
+	};
+	if (isPublicMessage === "0") {
+		jsonObj.push(user);
+		console.log("user: " + JSON.stringify(jsonObj));
+	} else {
+		customObj.push(user);
+		console.log("user: " + JSON.stringify(customObj));
+	}
+}
+
 
 module.exports = {
 	activate,
