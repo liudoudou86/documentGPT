@@ -35,7 +35,10 @@ let customObj = [
 function activate(context) {
 
 	console.log("documentGPT已被激活!");
-	// 通过vscode指令进行激活
+	/**
+	 * 通过vscode指令进行激活
+	 * 处理通用提示
+	 */
 	const initConversation = vscode.commands.registerCommand("documentGPT.input", async function () {
 		if (activeEditor) {
 			const { document, selection } = activeEditor;
@@ -65,6 +68,9 @@ function activate(context) {
 		}
 	});
 
+	/**
+	 * 处理定制提示
+	 */
 	const customConversation = vscode.commands.registerCommand("documentGPT.custom", async function () {
 		if (activeEditor) {
 			const { document, selection } = activeEditor;
@@ -94,6 +100,9 @@ function activate(context) {
 		}
 	});
 
+	/**
+	 * 清除会话
+	 */
 	const clearConversation = vscode.commands.registerCommand("documentGPT.clear", function () {
 		jsonObj.splice(1); // 删除对象索引1之后的数据
 		customObj.splice(2);
