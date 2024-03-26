@@ -6,24 +6,21 @@ const activeEditor = vscode.window.activeTextEditor;
 const documentGPTConfig = vscode.workspace.getConfiguration("documentGPT");
 const url = documentGPTConfig.get("url");
 const key = documentGPTConfig.get("key");
+const model = documentGPTConfig.get("model");
 const prompt = documentGPTConfig.get("prompt");
 
 let jsonObj = [
 	{
 		"role": "system",
-		"content": "请以markdown的形式返回答案"
+		"content": "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话，你会为用户提供安全，有帮助，准确的回答。"
 	}
 ];
 
 let customObj = [
 	{
 		"role": "system",
-		"content": "请以markdown的形式返回答案"
-	},
-	{
-		"role": "user",
 		"content": prompt
-	},
+	}
 ];
 
 // This method is called when your extension is activated
@@ -43,7 +40,7 @@ function activate(context) {
 		if (activeEditor) {
 			const { document, selection } = activeEditor;
 			const selectedText = document.getText(selection);
-			console.log("selectedText: " + selectedText);
+			// console.log("selectedText: " + selectedText);
 			if (!selectedText) {
 				// 弹出输入窗口
 				const userMessage = await vscode.window.showInputBox({
@@ -75,7 +72,7 @@ function activate(context) {
 		if (activeEditor) {
 			const { document, selection } = activeEditor;
 			const selectedText = document.getText(selection);
-			console.log("selectedText: " + selectedText);
+			// console.log("selectedText: " + selectedText);
 			if (!selectedText) {
 				// 弹出输入窗口
 				const userMessage = await vscode.window.showInputBox({
@@ -106,8 +103,8 @@ function activate(context) {
 	const clearConversation = vscode.commands.registerCommand("documentGPT.clear", function () {
 		jsonObj.splice(1); // 删除对象索引1之后的数据
 		customObj.splice(2);
-		console.log("clear: " + JSON.stringify(jsonObj));
-		console.log("clear: " + JSON.stringify(customObj));
+		// console.log("clear: " + JSON.stringify(jsonObj));
+		// console.log("clear: " + JSON.stringify(customObj));
 		vscode.window.showInformationMessage("documentGPT会话已清除!");
 	});
 
@@ -134,11 +131,11 @@ async function textInput(filePath, message) {
 		// 获取 vscode.TextEditorEdit对象， 然后进行字符处理
 		await editor.edit(editorEdit => { 
 			const lastLine = doc.lineAt(doc.lineCount - 1);
-			console.log("最后一行: " + JSON.stringify(lastLine));
+			// console.log("最后一行: " + JSON.stringify(lastLine));
 			// 这里可以做以下操作: 删除, 插入, 替换, 设置换行符
 			editorEdit.insert(lastLine.range.end, `\n${message}`);
 		});
-		console.log("文本插入成功");
+		// console.log("文本插入成功");
 	} catch (err) {
 		console.error("文本插入错误: " + err);
 	}
@@ -152,33 +149,32 @@ async function textInput(filePath, message) {
  */
 async function chatGptRequest(messages, isPublicMessage) {
 	try {
+		console.log(JSON.stringify(messages));
 		const res = await axios.post(url, {
 			messages: messages,
-			model: "gpt-3.5-turbo"
+			model: model,
+			temperature: 0.3
 		}, {
-			params: {
-				key: key
+			headers: {
+				Authorization: key
 			}
 		});
 
-		const robotMessage = res.data.choices[0].text;
-		const answer = "🤖: " + robotMessage;
+		const robotMessage = res.data.choices[0].message;
+		console.log(robotMessage);
+		const answer = "🤖: " + JSON.stringify(robotMessage.content);
 		textInput(activeEditor.document.uri, answer);
 
-		const assistant = {
-			role: "assistant",
-			content: robotMessage
-		};
-
 		if (isPublicMessage === "0") {
-			jsonObj.push(assistant);
-			console.log("assistant: " + JSON.stringify(jsonObj));
+			jsonObj.push(robotMessage);
+			// console.log("assistant: " + JSON.stringify(jsonObj));
 		} else {
-			customObj.push(assistant);
-			console.log("assistant: " + JSON.stringify(customObj));
+			customObj.push(robotMessage);
+			// console.log("assistant: " + JSON.stringify(customObj));
 		}
 	} catch (err) {
 		console.error("系统异常: " + err);
+		textInput(activeEditor.document.uri, err);
 	}
 }
 
@@ -195,10 +191,10 @@ function processUserMessage(userMessage, isPublicMessage) {
 	};
 	if (isPublicMessage === "0") {
 		jsonObj.push(user);
-		console.log("user: " + JSON.stringify(jsonObj));
+		// console.log("user: " + JSON.stringify(jsonObj));
 	} else {
 		customObj.push(user);
-		console.log("user: " + JSON.stringify(customObj));
+		// console.log("user: " + JSON.stringify(customObj));
 	}
 }
 

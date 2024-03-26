@@ -30,6 +30,11 @@
                     "default": null,
                     "description": "DocumentGPT's Key"
                 },
+                "documentGPT.model": {
+                    "type": "string",
+                    "default": null,
+                    "description": "DocumentGPT's Model"
+                },
                 "documentGPT.prompt": {
                     "type": "string",
                     "default": null,
@@ -60,10 +65,10 @@
         ],
         "submenus": [
             {
-              "id": "myProject/content",
-              "label": "DocumentGPT"
+                "id": "myProject/content",
+                "label": "DocumentGPT"
             }
-          ],
+        ],
         "menus": {
             "editor/context": [
                 {
@@ -73,18 +78,18 @@
             ],
             "myProject/content": [
                 {
-                  "command": "documentGPT.input",
-                  "group": "1"
+                    "command": "documentGPT.input",
+                    "group": "1"
                 },
                 {
-                  "command": "documentGPT.clear",
-                  "group": "1"
+                    "command": "documentGPT.clear",
+                    "group": "1"
                 },
                 {
-                  "command": "documentGPT.custom",
-                  "group": "2"
+                    "command": "documentGPT.custom",
+                    "group": "2"
                 }
-              ]
+            ]
         }
     },
     "scripts": {
@@ -106,6 +111,7 @@
         "typescript": "^4.9.4"
     },
     "dependencies": {
-        "axios": "^1.4.0"
+        "axios": "^1.4.0",
+        "vscode": "^1.1.37"
     }
 }
